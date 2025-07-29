@@ -1,0 +1,155 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Typography and Body */
+body {
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.6;
+}
+
+/* Header styles */
+#mainHeader {
+  background: linear-gradient(to right, #ff9966, #ff5e62);
+  padding: 20px;
+  text-align: center;
+  text-transform: uppercase;
+  color: white;
+}
+
+/* Navigation styles */
+.nav-menu {
+  list-style-type: none;
+  display: flex;
+  justify-content: center;
+  background-color: #007BFF;
+}
+.nav-menu li {
+  margin: 0 10px;
+}
+.nav-menu a {
+  color: white;
+  text-decoration: none;
+  padding: 10px;
+}
+.nav-menu a:hover {
+  background-color: #0056b3;
+}
+
+/* Event Card Styles */
+.eventCard {
+  border: 1px solid #ddd;
+  padding: 20px;
+  margin: 15px;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* CTA Button */
+.cta-button {
+  background-color: #007BFF;
+  color: white;
+  padding: 10px 20px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+/* Description Typography */
+.description {
+  font-size: 1rem;
+  font-style: italic;
+  letter-spacing: 0.5px;
+  text-align: justify;
+}
+
+/* News - Multi Column */
+.news article {
+  column-count: 2;
+  column-gap: 30px;
+  column-rule: 1px solid gray;
+  padding: 20px;
+}
+
+/* Table Styling */
+.event-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+.event-table th, .event-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+.event-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Footer and Icons */
+.footer {
+  background: #333;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+.footer img {
+  margin: 0 5px;
+}
+
+/* List Styling */
+ul.nav-menu {
+  list-style-type: none;
+  list-style-position: inside;
+}
+ul.nav-menu li {
+  padding: 10px;
+}
+
+/* Form Field Outline */
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid #007BFF;
+}
+
+/* Display test */
+.hidden-element {
+  visibility: hidden;
+}
+.none-element {
+  display: none;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+  .nav-menu {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cta-button {
+    width: 100%;
+  }
+
+  .eventCard {
+    margin: 10px;
+  }
+
+  body {
+    font-size: 14px;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+/* Bonus: Flex layout */
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}

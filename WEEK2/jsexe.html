@@ -1,0 +1,26 @@
+// File: index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Community Portal</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <h1>Community Events</h1>
+  <form id="registrationForm">
+    <input name="name" placeholder="Name" required />
+    <input name="email" placeholder="Email" required type="email" />
+    <select name="event">
+      <option value="Music">Music</option>
+      <option value="Workshop">Workshop</option>
+    </select>
+    <button id="registerBtn" type="submit">Register</button>
+  </form>
+  <div id="eventsContainer"></div>
+  <div id="loading">Loading...</div>
+  <script src="main.js"></script>
+</body>
+</html>
+

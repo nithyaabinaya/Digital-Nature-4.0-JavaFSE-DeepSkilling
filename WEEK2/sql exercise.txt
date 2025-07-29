@@ -1,0 +1,185 @@
+-- 1. User Upcoming Events
+SELECT e.event_id, e.title, e.start_date, e.end_date
+FROM Events e
+JOIN Registrations r ON e.event_id = r.event_id
+WHERE r.user_id = ? 
+  AND e.status = 'upcoming' 
+  AND e.city = (SELECT city FROM Users WHERE user_id = ?)
+ORDER BY e.start_date;
+
+-- 2. Top Rated Events
+SELECT e.event_id, e.title, AVG(f.rating) AS avg_rating
+FROM Events e
+JOIN Feedback f ON e.event_id = f.event_id
+GROUP BY e.event_id
+HAVING COUNT(f.feedback_id) >= 10
+ORDER BY avg_rating DESC;
+
+-- 3. Inactive Users
+SELECT u.user_id, u.full_name, u.email
+FROM Users u
+LEFT JOIN Registrations r ON u.user_id = r.user_id
+WHERE r.registration_date IS NULL 
+   OR DATEDIFF(CURRENT_DATE, r.registration_date) > 90;
+
+-- 4. Peak Session Hours
+SELECT e.event_id, e.title, COUNT(s.session_id) AS session_count
+FROM Events e
+JOIN Sessions s ON e.event_id = s.event_id
+WHERE HOUR(s.start_time) BETWEEN 10 AND 12
+GROUP BY e.event_id;
+
+-- 5. Most Active Cities
+SELECT city, COUNT(DISTINCT user_id) AS active_users
+FROM Users
+GROUP BY city
+ORDER BY active_users DESC
+LIMIT 5;
+
+-- 6. Event Resource Summary
+SELECT e.event_id, e.title, 
+       COUNT(CASE WHEN r.resource_type = 'pdf' THEN 1 END) AS pdf_count,
+       COUNT(CASE WHEN r.resource_type = 'image' THEN 1 END) AS image_count,
+       COUNT(CASE WHEN r.resource_type = 'link' THEN 1 END) AS link_count
+FROM Events e
+LEFT JOIN Resources r ON e.event_id = r.event_id
+GROUP BY e.event_id;
+
+-- 7. Low Feedback Alerts
+SELECT u.user_id, u.full_name, f.rating, f.comments, e.title AS event_name
+FROM Feedback f
+JOIN Users u ON f.user_id = u.user_id
+JOIN Events e ON f.event_id = e.event_id
+WHERE f.rating < 3;
+
+-- 8. Sessions per Upcoming Event
+SELECT e.event_id, e.title, COUNT(s.session_id) AS session_count
+FROM Events e
+LEFT JOIN Sessions s ON e.event_id = s.event_id
+WHERE e.status = 'upcoming'
+GROUP BY e.event_id;
+
+-- 9. Organizer Event Summary
+SELECT u.user_id, u.full_name, 
+       COUNT(e.event_id) AS event_count, 
+       SUM(CASE WHEN e.status = 'upcoming' THEN 1 ELSE 0 END) AS upcoming_count,
+       SUM(CASE WHEN e.status = 'completed' THEN 1 ELSE 0 END) AS completed_count,
+       SUM(CASE WHEN e.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_count
+FROM Users u
+LEFT JOIN Events e ON u.user_id = e.organizer_id
+GROUP BY u.user_id;
+
+-- 10. Feedback Gap
+SELECT e.event_id, e.title
+FROM Events e
+LEFT JOIN Feedback f ON e.event_id = f.event_id
+WHERE e.event_id IN (SELECT DISTINCT r.event_id FROM Registrations r)
+GROUP BY e.event_id
+HAVING COUNT(f.feedback_id) = 0;
+
+-- 11. Daily New User Count
+SELECT registration_date, COUNT(user_id) AS new_users
+FROM Users
+WHERE registration_date BETWEEN CURDATE() - INTERVAL 7 DAY AND CURDATE()
+GROUP BY registration_date
+ORDER BY registration_date DESC;
+
+-- 12. Event with Maximum Sessions
+SELECT e.event_id, e.title, COUNT(s.session_id) AS session_count
+FROM Events e
+JOIN Sessions s ON e.event_id = s.event_id
+GROUP BY e.event_id
+ORDER BY session_count DESC
+LIMIT 1;
+
+-- 13. Average Rating per City
+SELECT e.city, AVG(f.rating) AS avg_rating
+FROM Events e
+JOIN Feedback f ON e.event_id = f.event_id
+GROUP BY e.city;
+
+-- 14. Most Registered Events
+SELECT e.event_id, e.title, COUNT(r.registration_id) AS registration_count
+FROM Events e
+JOIN Registrations r ON e.event_id = r.event_id
+GROUP BY e.event_id
+ORDER BY registration_count DESC
+LIMIT 3;
+
+-- 15. Event Session Time Conflict
+SELECT s1.session_id AS session_1, s2.session_id AS session_2, e.event_id, e.title
+FROM Sessions s1
+JOIN Sessions s2 ON s1.event_id = s2.event_id
+JOIN Events e ON s1.event_id = e.event_id
+WHERE s1.session_id < s2.session_id 
+  AND (s1.start_time < s2.end_time AND s1.end_time > s2.start_time);
+
+-- 16. Unregistered Active Users
+SELECT u.user_id, u.full_name, u.email
+FROM Users u
+LEFT JOIN Registrations r ON u.user_id = r.user_id
+WHERE r.user_id IS NULL AND DATEDIFF(CURRENT_DATE, u.registration_date) <= 30;
+
+-- 17. Multi-Session Speakers
+SELECT speaker_name, COUNT(session_id) AS session_count
+FROM Sessions
+GROUP BY speaker_name
+HAVING session_count > 1;
+
+-- 18. Resource Availability Check
+SELECT e.event_id, e.title
+FROM Events e
+LEFT JOIN Resources r ON e.event_id = r.event_id
+GROUP BY e.event_id
+HAVING COUNT(r.resource_id) = 0;
+
+-- 19. Completed Events with Feedback Summary
+SELECT e.event_id, e.title, COUNT(r.registration_id) AS registration_count, AVG(f.rating) AS avg_rating
+FROM Events e
+JOIN Registrations r ON e.event_id = r.event_id
+JOIN Feedback f ON e.event_id = f.event_id
+WHERE e.status = 'completed'
+GROUP BY e.event_id;
+
+-- 20. User Engagement Index
+SELECT u.user_id, u.full_name, 
+       COUNT(DISTINCT r.event_id) AS events_attended, 
+       COUNT(DISTINCT f.feedback_id) AS feedback_submitted
+FROM Users u
+LEFT JOIN Registrations r ON u.user_id = r.user_id
+LEFT JOIN Feedback f ON u.user_id = f.user_id
+GROUP BY u.user_id;
+
+-- 21. Top Feedback Providers
+SELECT u.user_id, u.full_name, COUNT(f.feedback_id) AS feedback_count
+FROM Users u
+JOIN Feedback f ON u.user_id = f.user_id
+GROUP BY u.user_id
+ORDER BY feedback_count DESC
+LIMIT 5;
+
+-- 22. Duplicate Registrations Check
+SELECT r.user_id, r.event_id, COUNT(r.registration_id) AS registration_count
+FROM Registrations r
+GROUP BY r.user_id, r.event_id
+HAVING registration_count > 1;
+
+-- 23. Registration Trends
+SELECT MONTH(r.registration_date) AS month, YEAR(r.registration_date) AS year, COUNT(r.registration_id) AS registration_count
+FROM Registrations r
+WHERE r.registration_date BETWEEN CURDATE() - INTERVAL 12 MONTH AND CURDATE()
+GROUP BY YEAR(r.registration_date), MONTH(r.registration_date)
+ORDER BY year DESC, month DESC;
+
+-- 24. Average Session Duration per Event
+SELECT e.event_id, e.title, AVG(TIMESTAMPDIFF(MINUTE, s.start_time, s.end_time)) AS avg_session_duration
+FROM Events e
+JOIN Sessions s ON e.event_id = s.event_id
+GROUP BY e.event_id;
+
+-- 25. Events Without Sessions
+SELECT e.event_id, e.title
+FROM Events e
+LEFT JOIN Sessions s ON e.event_id = s.event_id
+GROUP BY e.event_id
+HAVING COUNT(s.session_id) = 0;
